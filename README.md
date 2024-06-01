@@ -10,6 +10,6 @@ Machine learning Pytorch and Tensorflow example codes
    RNN model is created and trained
    Parameter Comparision for RNN. LSTM, GRU
 4. SentimentAnalysisNLP.py (Python 3.11 version ) ## Sentiment Analysis
-      # https://github.com/DenysLins/introduction_to_machine_learning/blob/master/4B_Natural_Language_Processing_Assignment.ipynb 4A Jupyter notebook 
-      # Load the file and pull out words and embeddings
+      https://github.com/DenysLins/introduction_to_machine_learning/blob/master/4B_Natural_Language_Processing_Assignment.ipynb 4A Jupyter notebook 
+      Load the file and pull out words and embeddings
       

@@ -1,124 +1,92 @@
-## Sentiment Analysis
+# Sentiment analysis 
+# (4B assignment): 
+# AG News dataset contains text from 127600 online news articles, from 4 different categories: World, Sports, Business, and Science/Technology.
+# import torchtext
 
-# https://github.com/DenysLins/introduction_to_machine_learning/blob/master/4B_Natural_Language_Processing_Assignment.ipynb 4A Jupyter notebook 
+# agnews_train, agnews_test = torchtext.datasets.text_classification.DATASETS["AG_NEWS"](root="./datasets")
 
-# Load the file and pull out words and embeddings
-import h5py
+import torchtext
+from torch.nn.utils.rnn import pad_sequence
 import numpy as np
-import string
-with h5py.File('datasets/mini.h5', 'r') as f:
-    all_words = [word.decode('utf-8') for word in f['mat']['axis1'][:]]
-    all_embeddings = f['mat']['block0_values'][:]
-    
-print("all_words dimensions: {}".format(len(all_words)))
-print("all_embeddings dimensions: {}".format(all_embeddings.shape))
-
-print("Random example word: {}".format(all_words[1337]))
-
-english_words = [word[6:] for word in all_words if word.startswith('/c/en/')]
-english_word_indices = [i for i, word in enumerate(all_words) if word.startswith('/c/en/')]
-english_embeddings = all_embeddings[english_word_indices]
-
-print("Number of English words in all_words: {0}".format(len(english_words)))
-print("english_embeddings dimensions: {0}".format(english_embeddings.shape))
-
-print(english_words[1337])
-
-
-norms = np.linalg.norm(english_embeddings, axis=1)
-normalized_embeddings = english_embeddings.astype('float32') / norms.astype('float32').reshape([-1, 1])
-
-index = {word: i for i, word in enumerate(english_words)}
-
-remove_punct=str.maketrans('','',string.punctuation)
-
-# This function converts a line of our data file into
-# a tuple (x, y), where x is 300-dimensional representation
-# of the words in a review, and y is its label.
-def convert_line_to_example(line):
-    # Pull out the first character: that's our label (0 or 1)
-    y = int(line[0])
-    
-    # Split the line into words using Python's split() function
-    words = line[2:].translate(remove_punct).lower().split()
-    
-    # Look up the embeddings of each word, ignoring words not
-    # in our pretrained vocabulary.
-    embeddings = [normalized_embeddings[index[w]] for w in words
-                  if w in index]
-    
-    # Take the mean of the embeddings
-    x = np.mean(np.vstack(embeddings), axis=0)
-    return x, y
-
-# Apply the function to each line in the file.
-xs = []
-ys = []
-
-with open("datasets/movie-simple.txt", "r", encoding='utf-8', errors='ignore') as f:
-    for l in f.readlines():
-        x, y = convert_line_to_example(l)
-        xs.append(x)
-        ys.append(y)
-
-# Concatenate all examples into a numpy array
-xs = np.vstack(xs)
-ys = np.vstack(ys)
-
-print("Shape of inputs: {}".format(xs.shape))
-print("Shape of labels: {}".format(ys.shape))
-
-num_examples = xs.shape[0]
-
-print("First 20 labels before shuffling: {0}".format(ys[:20, 0]))
-
-shuffle_idx = np.random.permutation(num_examples)
-xs = xs[shuffle_idx, :]
-ys = ys[shuffle_idx, :]
-
-print("First 20 labels after shuffling: {0}".format(ys[:20, 0]))
-
 import torch
-
-num_train = 4*num_examples // 5
-
-x_train = torch.tensor(xs[:num_train])
-y_train = torch.tensor(ys[:num_train], dtype=torch.float32)
-
-x_test = torch.tensor(xs[num_train:])
-y_test = torch.tensor(ys[num_train:], dtype=torch.float32)
-
-reviews_train = torch.utils.data.TensorDataset(x_train, y_train)
-reviews_test = torch.utils.data.TensorDataset(x_test, y_test)
-
-train_loader = torch.utils.data.DataLoader(reviews_train, batch_size=100, shuffle=True)
-test_loader = torch.utils.data.DataLoader(reviews_test, batch_size=100, shuffle=False)
-
 import torch.nn as nn
 import torch.nn.functional as F
+
+
+ngrams = 1
+train_csv_path = './datasets/ag_news_csv/train.csv'
+test_csv_path = './datasets/ag_news_csv/test.csv'
+vocab = torchtext.vocab.build_vocab_from_iterator(
+    torchtext.datasets.text_classification._csv_iterator(train_csv_path, ngrams))
+train_data, train_labels = torchtext.datasets.text_classification._create_data_from_iterator(
+        vocab, torchtext.datasets.text_classification._csv_iterator(train_csv_path, ngrams, yield_cls=True), False)
+test_data, test_labels = torchtext.datasets.text_classification._create_data_from_iterator(
+        vocab, torchtext.datasets.text_classification._csv_iterator(test_csv_path, ngrams, yield_cls=True), False)
+if len(train_labels ^ test_labels) > 0:
+    raise ValueError("Training and test labels don't match")
+agnews_train = torchtext.datasets.TextClassificationDataset(vocab, train_data, train_labels)
+agnews_test = torchtext.datasets.TextClassificationDataset(vocab, test_data, test_labels)
+
+print(agnews_train[0])
+print("Length of the first text example: {}".format(len(agnews_train[0][1])))
+print("Length of the second text example: {}".format(len(agnews_train[1][1])))
+
+padded_exs = pad_sequence([agnews_train[0][1], agnews_train[1][1]])
+print("First sequence padded: {}".format(padded_exs[:,0]))
+print("First sequence length: {}".format(len(padded_exs[:,0])))
+print("Second sequence padded: {}".format(padded_exs[:,1]))
+print("Second sequence length: {}".format(len(padded_exs[:,1])))
+
+def collator(batch):
+    
+    labels = torch.tensor([example[0] for example in batch])
+    sentences = [example[1] for example in batch]
+    data = pad_sequence(sentences)
+    return [data, labels]
+
+BATCH_SIZE = 128
+
+train_loader = torch.utils.data.DataLoader(agnews_train, batch_size=BATCH_SIZE, shuffle=True, collate_fn=collator)
+test_loader = torch.utils.data.DataLoader(agnews_test, batch_size=BATCH_SIZE, shuffle=False, collate_fn=collator)
+
+print(len(train_loader))
+print(len(agnews_train.get_labels()))
+
+VOCAB_SIZE = len(agnews_train.get_vocab())
+EMBED_DIM = 100
+HIDDEN_DIM = 64
+NUM_OUTPUTS = len(agnews_train.get_labels())
+NUM_EPOCHS = 3
+
 class SWEM(nn.Module):
-    def __init__(self):
+    def __init__(self, vocab_size, embedding_size, hidden_dim, num_outputs):
         super().__init__()
-        self.fc1 = nn.Linear(300, 64)
-        self.fc2 = nn.Linear(64, 1)
+        self.embedding = nn.Embedding(vocab_size, embedding_size)
+        
+        self.fc1 = nn.Linear(embedding_size, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, num_outputs)
 
     def forward(self, x):
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.fc2(x)
-        return x
+        embed = self.embedding(x)
+        embed_mean = torch.mean(embed, dim=0)
+        
+        h = self.fc1(embed_mean)
+        h = F.relu(h)
+        h = self.fc2(h)
+        return h
     
-
 ## Training
 # Instantiate model
-model = SWEM()
+model = SWEM(VOCAB_SIZE, EMBED_DIM, HIDDEN_DIM, NUM_OUTPUTS)
 
 # Binary cross-entropy (BCE) Loss and Adam Optimizer
-criterion = nn.BCEWithLogitsLoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+#criterion = nn.BCEWithLogitsLoss()
+#optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
+criterion = nn.CrossEntropyLoss()
+optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 
 # Iterate through train set minibatchs 
-for epoch in range(250):
+for epoch in range(NUM_EPOCHS):
     correct = 0
     num_examples = 0
     for inputs, labels in train_loader:
@@ -126,7 +94,9 @@ for epoch in range(250):
         optimizer.zero_grad()
         
         # Forward pass
+       
         y = model(inputs)
+        #labels = labels.unsqueeze(-1) 
         loss = criterion(y, labels)
         
         # Backward pass
@@ -134,33 +104,20 @@ for epoch in range(250):
         optimizer.step()
         
         predictions = torch.round(torch.sigmoid(y))
-        correct += torch.sum((predictions == labels).float())
-        num_examples += len(inputs)
-    
-    # Print training progress
-    if epoch % 25 == 0:
-        acc = correct/num_examples
-        print("Epoch: {0} \t Train Loss: {1} \t Train Acc: {2}".format(epoch, loss, acc))
 
-## Testing
 correct = 0
-num_test = 0
+total = len(test_loader)
+
 
 with torch.no_grad():
     # Iterate through test set minibatchs 
     for inputs, labels in test_loader:
         # Forward pass
+        #x = images.view(-1, 28*28)
         y = model(inputs)
         
-        predictions = torch.round(torch.sigmoid(y))
+        predictions = torch.argmax(y, dim=1)
         correct += torch.sum((predictions == labels).float())
-        num_test += len(inputs)
     
-print('Test accuracy: {}'.format(correct/num_test))
-
-# Check some words
-words_to_test = ["exciting", "hated", "boring", "loved"]
-
-for word in words_to_test:
-    x = torch.tensor(normalized_embeddings[index[word]].reshape(1, 300))
-    print("Sentiment of the word '{0}': {1}".format(word, torch.sigmoid(model(x))))
+print('Test accuracy: {}'.format(correct/total))
+   

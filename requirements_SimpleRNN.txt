@@ -1,0 +1,5 @@
+# this has the requirements to run the SimpleRNN.py using Python 3.11
+# Run this using cmd:   pip install -r .\requirements_SimpleRNN.txt
+
+numpy
+tensorflow

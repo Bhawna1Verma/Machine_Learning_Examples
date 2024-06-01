@@ -2,3 +2,11 @@
 Machine learning Pytorch and Tensorflow example codes
 1. MNIST_DATA_Model.py : (Python 3.9 version ) MNIST data (28*28) -> Conv2d+FC layer pytorch implementation example -> Accuracy 91%
 2. Simple RNN: (Python 3.11 version) # # Introduction to Logistic Regression in PyTorch: to build a very simple neural network in PyTorch to do handwritten digit classification.
+3. Word_Embedding_SWEM_RNN_LSTM_GRU.py (Python 3.11)  -> SENTIMENT ANALYSIS Example
+   code from 4A coursera.
+   How the word to embeddings are obtained.
+   Embeddings are trained
+   SWEM model is created on the embeddings
+   RNN model is created and trained
+   Parameter Comparision for RNN. LSTM, GRU 
+      

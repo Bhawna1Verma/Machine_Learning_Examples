@@ -1,3 +1,8 @@
+# The OpenAI-gym- for environment
+# Python 3.11: Coursera Lab exercise. 
+
+# check readme file for more details
+
 import numpy as np
 env = gym.make('FrozenLake-v0')
 

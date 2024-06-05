@@ -1,5 +1,9 @@
 # Based on: https://gym.openai.com/evaluations/eval_EIcM1ZBnQW2LBaFN6FY65g/
 
+# Python 3.11: Coursera Lab exercise. 
+
+# check readme file for more details
+
 from collections import deque
 import random
 import math

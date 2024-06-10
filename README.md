@@ -13,3 +13,4 @@ Machine learning Pytorch and Tensorflow example codes
       https://github.com/DenysLins/introduction_to_machine_learning/blob/master/4B_Natural_Language_Processing_Assignment.ipynb 4A Jupyter notebook 
       Load the file and pull out words and embeddings
       
+5. Chatbot using sklearn and nltk libraries (chatbotMain.py) : reading from chatbot.txt : based on cosine similarity 

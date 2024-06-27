@@ -20,3 +20,4 @@ Machine learning Pytorch and Tensorflow example codes
 https://github.com/Mozilla-Ocho/llamafile/blob/main/README.md#quickstart
 The executable is 4 Gb. Can be downloaded to run locally
 Multimodal: Text and Image both
+This is all accomplished by combining llama.cpp with Cosmopolitan Libc, which provides some useful capabilities:

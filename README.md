@@ -15,3 +15,8 @@ Machine learning Pytorch and Tensorflow example codes
       
 5. Reinforcement learning examples using OpenAi GYM (ReinforcementLearningCartpole.py and ReinforcementLearningFrozenLake.py): coursera examples
 6. Chatbot using sklearn and nltk libraries (chatbotMain.py) : reading from chatbot.txt : based on cosine similarity 
+
+# LLaMa model executable link:
+https://github.com/Mozilla-Ocho/llamafile/blob/main/README.md#quickstart
+The executable is 4 Gb. Can be downloaded to run locally
+Multimodal: Text and Image both

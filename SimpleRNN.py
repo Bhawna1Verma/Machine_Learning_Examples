@@ -89,13 +89,11 @@ devectorize_example(x[0])
 devectorize_example(y[0])
 
 l_cb = LambdaCallback(
-    on_epoch_end = lambda e,l: print('{:.2f}'.format(1['val_acc']),end = ' _ ')
+    on_epoch_end = lambda e,l: print('{:.2f}'.format(l['val_acc']),end = ' _ ')
 )
 es_cb = EarlyStopping(monitor='val_loss', patience=10)
 model.fit(x,y,epochs=500,batch_size=256, validation_split=0.2,
-         verbose=False, callbacks=[es_cb])
-#model.fit(x,y,epochs=500,batch_size=256, validation_split=0.2,
-#         verbose=False, callbacks=[es_cb, l_cb])
+         verbose=False, callbacks=[es_cb,l_cb])
 
 x_test, y_test = create_dataset(10)
 preds = model.predict(x_test)
